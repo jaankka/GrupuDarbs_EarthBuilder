@@ -1,0 +1,8 @@
+Apraksts
+
+Ideja ir tada, ka atverot lapu var uz zemeslodes novietot objektus, kuri ir 3d modeli. Tie ir gltf formata modeli, tapec veidojot darbu tika izmantots GLTFLoader.Js ar kura palidzibu  ari veiksmigi
+varam importet gna pašu 3D modeli gan ta teksturu bez papildus soliem. Kreisaja mala ir HTML izvele, kuru varetu papildinat ar daudz citiem objektiem. Izveles uzdevums ir laut izveleties kadu no dotajiem modeliem, kurus var novietot uz Zemes. Ar RayCast palidzibu objekts tiek likts uz zemes un objekti tiek likti uz zemes ar saviem izmeriem (scaling), tie tiek pabiditi uz arpusi (lai nebutu iegrimuši zeme) un tiek noroteti pareizi, lai tie nenaktu no zemes ara ar kajam gaisa. 
+
+Nakotne noteikti šadu darbu var uztaisit ka interaktivu speli geografijas stundas jauniešiem ar daudziem objektiem, piemeram, lai paraditu kur atrodas piramidas. Protams, varetu papildinat 
+ar informacijas laukiem un citam cool ficam.
+

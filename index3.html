@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0;  overflow: hidden}
+			canvas { width: 100%; height: 100%; z-index: -2; }
+			#menu { z-index: 2; color:#fff; position:absolute; background-color: rgba(255,255,255,0.1); width: 300px; height: auto; margin-left: 15px; margin-top:15px;}
+		</style>
+	</head>
+	<body>
+		<div id="menu">
+			<center> Izvēlies, kuru objektu gribi uzlikt uz zemeslodes </center>
+			<a href="javascript:changepic('pagoda.gltf')">
+				<img id="asia" style="margin-left:25px;" width=250px height=200px src="https://i.gyazo.com/87d6ce137f52d1097a7cc93dfd5400fb.png"></img>
+			</a>
+			<a href="javascript:changepic('windmill.gltf')">
+				<img id="windmill" style="margin-left:25px;" width=250px height=200px src="https://i.gyazo.com/a121628812bf1ca71f8192bbda2403ef.png"></img>
+			</a>
+			<a href="javascript:changepic('piramida.gltf')">
+				<img id="piramida" style="margin-left:25px;" width=250px height=200px src="https://i.gyazo.com/65a19bd88fefc095c98c8c19db345ea8.png">			</img>
+			</a>
+		</div>
+		<script src="three.js-master/build/three.js"></script>
+		<script src="three.js-master/examples/js/controls/OrbitControls.js"></script>
+		<script src="three.js-master/examples/js/loaders/GLTFLoader.js"></script>
+		<script> 
+			var selected;
+			function changepic(name) {
+				selected = name;
+				debugger;
+			}
+		</script>
+		<script>
+			const module = {
+            frame: 0, 
+			sun: null, 
+			camera: null, 
+			renderer: null, 
+			scene: null, 
+			controls: null,
+			clock: null,
+
+            init() {
+				this.scene = new THREE.Scene();
+				this.camera = new THREE.PerspectiveCamera( 7, window.innerWidth / window.innerHeight, 1000, 227940 * 2 );
+				this.camera.position.z = 5;
+				this.clock = new THREE.Clock();
+				this.controls = new THREE.OrbitControls( this.camera );
+				var renderer = new THREE.WebGLRenderer({antialias: true});
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor(0xEEEEEE);
+				renderer.shadowMap.enabled = true;
+				this.renderer = renderer;
+				document.body.appendChild( this.renderer.domElement );
+				this.setupEvents();
+				this.createWorld();
+				this.createLights();
+				this.animate();
+			
+            },
+
+            setupEvents() {
+				window.addEventListener( 'resize', () => {
+					this.camera.aspect = window.innerWidth / window.innerHeight;
+    				this.camera.updateProjectionMatrix();
+    				this.renderer.setSize( window.innerWidth, window.innerHeight );
+				}, false );
+				this.raycaster = new THREE.Raycaster();
+				this.mouse = new THREE.Vector2();
+				this.selectedObj = null;
+				window.addEventListener('mousedown', (event) => {					
+					if (event.ctrlKey == true) {
+						this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+						this.mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+						this.raycaster.setFromCamera(this.mouse, this.camera);
+						var intersects = this.raycaster.intersectObjects(this.scene.children, true);
+						if (intersects[0].object.name != "sky")
+							this.createObject(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+					}
+				}, false);
+			},
+            
+			createWorld() {
+				this.camera.position.z = 227940/2;
+				this.camera.position.y = 227940/2;
+				var geometry = new THREE.SphereGeometry( 12756 * 13, 32, 32 );
+				var material = new THREE.MeshStandardMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'https://i.imgur.com/7mrsCHn.jpg' )});				
+				this.skySphere = new THREE.Mesh( geometry, material );
+				this.skySphere.name = "sky";
+				this.scene.add( this.skySphere );
+				this.createPlanet('earth', 'https://i.imgur.com/jdHxHEr.jpg', 'https://i.imgur.com/fWYXcJI.jpg', 12756 / 2);
+            },
+			createPlanet(name, textureName, normalName, radius) {
+				var geometry = new THREE.SphereGeometry( radius, 32, 32 );
+				var material = new THREE.MeshStandardMaterial({map: new THREE.TextureLoader().load(textureName), normalMap: new THREE.TextureLoader().load(normalName), metalness: 0});				
+				let planet = new THREE.Mesh( geometry, material );
+				this[name] = planet;
+				this.scene.add( planet );
+				planet.castShadow = true;
+				planet.receiveShadow = true;
+			},
+			
+            createObject(xasis, yasis, zasis) {
+				var scale = 500;
+				var loader = new THREE.GLTFLoader();
+				loader.load(selected, (gltf) => {
+				  	 
+				  	gltf.scene.scale.x = scale;
+				  	gltf.scene.scale.y = scale;
+				  	gltf.scene.scale.z = scale;
+					gltf.scene.castShadow = true;
+					gltf.scene.receiveShadow = true;
+					if (selected == "piramida.gltf") {
+						gltf.scene.position.x = xasis;
+						gltf.scene.position.y = yasis;
+						gltf.scene.position.z = zasis;
+					}
+					else {
+						if (xasis < 0)		
+						gltf.scene.position.x = xasis - scale / 2;
+						else
+						gltf.scene.position.x = xasis + scale / 2;
+						if (yasis < 0)
+						gltf.scene.position.y = yasis - scale / 2;
+						else
+						gltf.scene.position.y = yasis + scale / 2;
+						if (zasis < 0)
+						gltf.scene.position.z = zasis - scale / 2;
+						else
+						gltf.scene.position.z = zasis + scale / 2;
+					}
+					gltf.scene.lookAt(0,0,0);
+					this.scene.add( gltf.scene ); 
+				  	debugger;
+				}, 
+				( xhr ) => {
+				  	console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+				},
+				( error ) => {
+				  	console.log( 'An error happened' );
+				});
+            },
+	
+
+            createLights() {
+				var spotLight = new THREE.DirectionalLight(0xffffff, 1);
+				spotLight.castShadow = true;
+				spotLight.penumbra = 0.5;
+				spotLight.shadow.mapSize.width = 1024;
+				spotLight.shadow.mapSize.height = 1024;
+				spotLight.shadow.camera.near = this.camera.near;
+				spotLight.shadow.camera.far = this.camera.far;
+				this.scene.add( spotLight );
+				this.scene.add(new THREE.AmbientLight( 0x404040 ));
+
+            },
+
+
+            animate() {
+  				this.controls.update();
+				requestAnimationFrame(() => this.animate());
+				this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        module.init();
+		</script>
+	</body>
+</html>
